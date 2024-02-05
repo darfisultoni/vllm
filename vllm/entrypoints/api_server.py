@@ -1,5 +1,6 @@
 import argparse
 import json
+import time
 from typing import AsyncGenerator
 
 from fastapi import FastAPI, Request
@@ -38,6 +39,8 @@ async def generate(request: Request) -> Response:
     sampling_params = SamplingParams(**request_dict)
     request_id = random_uuid()
 
+    stage1_time = time.time()
+
     results_generator = engine.generate(prompt,
                                         sampling_params,
                                         request_id,
@@ -68,7 +71,7 @@ async def generate(request: Request) -> Response:
     assert final_output is not None
     prompt = final_output.prompt
     text_outputs = [prompt + output.text for output in final_output.outputs]
-    ret = {"text": text_outputs}
+    ret = {"text": text_outputs, "time1": stage1_time}
     return JSONResponse(ret)
 
 
